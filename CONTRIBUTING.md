@@ -83,7 +83,7 @@ Since PRs are squash-merged, **the PR title becomes the commit in `main`**, so w
 
 ## Secrets
 
-Never commit `.env`, API keys, tokens or `credentials.json`. The repository is **public**
+Never commit `.env` anyway you cant do it, API keys, tokens or `credentials.json`. The repository is **public**
 If you committed a secret by accident, tell the team lead immediately: the key must be revoked, deleting the commit is not enough.
 
 
@@ -168,5 +168,5 @@ type: short description in imperative mood
 
 ## Секреты
 
-Никогда не коммитьте `.env`, API-ключи, токены и `credentials.json`. Репозиторий **публичный**.
+Никогда не коммитьте `.env` а вы и не сможете, API-ключи, токены и `credentials.json`. Репозиторий **публичный**.
 Если случайно закоммитили секрет, сразу сообщите тимлиду: ключ нужно отозвать, удалить коммит недостаточно.
