@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from schedule_sender.models import TableRef
 
 REQUIRED_COLUMNS = ("Date", "Time", "Room", "Course")
-OPTIONAL_COLUMNS = ("Teacher", "Form")
+OPTIONAL_COLUMNS = ("Form",)
 
 
 @dataclass(frozen=True)

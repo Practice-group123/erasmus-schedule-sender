@@ -63,10 +63,8 @@ class Session:
     end: time
     subject: str            # "International Private Law", stored as written
     room: str | None        # "218", "online", None if empty
-    teacher: str | None
-    form: str | None        # "выбор" or None
     source: str             # TableRef.name
-    group: str | None = None  # not parsed yet
+    group: str | None = None  # meaning not confirmed yet
 
 
 @dataclass
