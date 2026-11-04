@@ -11,7 +11,9 @@ def normalize_text(raw: str) -> str:
 
     "  International   Private Law " -> "International Private Law"
     """
-    raise NotImplementedError
+    lowered_raw = raw.lower()
+    non_space_raw = lowered_raw.replace(" ", "")
+    return non_space_raw
 
 
 def parse_time_range(raw: str) -> tuple[time, time]:
