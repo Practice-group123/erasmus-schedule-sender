@@ -3,17 +3,22 @@
 Task 4.
 """
 
-from datetime import time
-
+from datetime import datetime, time
+import errors.normalize_errors as errors
 
 def normalize_text(raw: str) -> str:
     """Trim and collapse whitespace. Case is kept.
 
     "  International   Private Law " -> "International Private Law"
     """
-    lowered_raw = raw.lower()
-    non_space_raw = lowered_raw.replace(" ", "")
-    return non_space_raw
+
+    non_space_raw = raw.replace(" ", "")
+    if not non_space_raw:
+        raise errors.NormalizeEmptyValueError("normalize_text", "raw is empty")
+    
+    lowered_raw = non_space_raw.lower()
+    
+    return lowered_raw
 
 
 def parse_time_range(raw: str) -> tuple[time, time]:
@@ -21,7 +26,21 @@ def parse_time_range(raw: str) -> tuple[time, time]:
 
     Also accept "8:30 - 10:00", "08.30-10.00". Raise ValueError on bad input.
     """
-    raise NotImplementedError
+    non_space_raw = raw.replace(" ", "")
+    if not non_space_raw:
+        raise errors.NormalizeEmptyValueError("parse_time_range", "raw is empty")
+    time_array = non_space_raw.replace(".", ":").split("-")
+    if len(time_array) != 2:
+        raise errors.NormalizeInvalidTimeFormatError("parse_time_range", f"raw is not a valid time range: {raw}")
+
+    try:
+        start_time = datetime.strptime(time_array[0], "%H:%M").time()
+        end_time = datetime.strptime(time_array[1], "%H:%M").time()
+    except ValueError:
+        raise errors.NormalizeInvalidTimeFormatError("parse_time_range", f"raw is not a valid time range: {raw}")
+
+    return (start_time, end_time)
+
 
 
 def parse_day_cell(raw: str) -> tuple[int, int, int]:
