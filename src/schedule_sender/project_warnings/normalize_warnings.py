@@ -21,6 +21,21 @@ class NormalizeEmptyValueWarning(NormalizeWarning):
         return f"Warning: empty variable in normalizer in {self.source}: {self.message}"
 
 
+class NormalizeInvalidAcademicYearWarning(NormalizeWarning):
+    """A warning occurred in the normalizer due to an invalid academic year.
+    """
+
+    def __init__(self, source: str, message: str) -> None:
+        self.source = source
+        self.message = message
+
+    def __str__(self) -> str:
+        return (
+            f"Warning: invalid academic year in normalizer in "
+            f"{self.source}: {self.message}"
+        )
+
+
 class NormalizeInvalidTimeFormatWarning(NormalizeWarning):
     """A warning occurred in the normalizer due to invalid time format.
     """

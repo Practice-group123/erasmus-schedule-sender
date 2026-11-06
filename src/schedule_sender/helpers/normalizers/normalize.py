@@ -5,6 +5,7 @@ import warnings
 
 from project_warnings.normalize_warnings import (
     NormalizeEmptyValueWarning,
+    NormalizeInvalidAcademicYearWarning,
     NormalizeInvalidDayFormatWarning,
     NormalizeInvalidTimeFormatWarning,
 )
@@ -137,7 +138,50 @@ def resolve_year(month: int, academic_year: str) -> int:
     "2026/2027": months from ACADEMIC_YEAR_START_MONTH to December -> 2026,
     January to the month before -> 2027. Warn on bad input.
     """
-    raise NotImplementedError
+    if not academic_year or not academic_year.strip():
+        warnings.warn(
+            NormalizeEmptyValueWarning("resolve_year", "academic_year is empty"),
+            stacklevel=2,
+        )
+        return 0
+
+    if not isinstance(month, int) or not 1 <= month <= 12:
+        warnings.warn(
+            NormalizeInvalidAcademicYearWarning(
+                "resolve_year", f"month is not valid: {month}"
+            ),
+            stacklevel=2,
+        )
+        return 0
+
+    academic_year_match = re.fullmatch(
+        r"(\d{4})\s*/\s*(\d{4})", academic_year.strip()
+    )
+    if academic_year_match is None:
+        warnings.warn(
+            NormalizeInvalidAcademicYearWarning(
+                "resolve_year",
+                f"academic_year is not valid: {academic_year}",
+            ),
+            stacklevel=2,
+        )
+        return 0
+
+    start_year = int(academic_year_match.group(1))
+    end_year = int(academic_year_match.group(2))
+    if end_year != start_year + 1:
+        warnings.warn(
+            NormalizeInvalidAcademicYearWarning(
+                "resolve_year",
+                f"academic_year does not contain consecutive years: {academic_year}",
+            ),
+            stacklevel=2,
+        )
+        return 0
+
+    if month >= ACADEMIC_YEAR_START_MONTH:
+        return start_year
+    return end_year
 
 
 def normalize_room(raw: str) -> str | None:
