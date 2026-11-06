@@ -3,7 +3,7 @@ import re
 
 import warnings
 
-from project_warnings.normalize_warnings import (
+from schedule_sender.project_warnings.normalize_warnings import (
     NormalizeEmptyValueWarning,
     NormalizeInvalidAcademicYearWarning,
     NormalizeInvalidDayFormatWarning,
