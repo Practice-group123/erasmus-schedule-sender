@@ -1,9 +1,11 @@
 from datetime import datetime, time
+import re
 
 import warnings
 
 from project_warnings.normalize_warnings import (
     NormalizeEmptyValueWarning,
+    NormalizeInvalidDayFormatWarning,
     NormalizeInvalidTimeFormatWarning,
 )
 
@@ -56,7 +58,73 @@ def parse_day_cell(raw: str) -> tuple[int, int, int]:
 
     The cell may contain line breaks. Warn on bad input.
     """
-    raise NotImplementedError
+    if not raw or not raw.strip():
+        warnings.warn(
+            NormalizeEmptyValueWarning("parse_day_cell", "raw is empty"),
+            stacklevel=2,
+        )
+        return (0, 0, -1)
+
+    compact_raw = re.sub(r"\s+", " ", raw).strip()
+    match = re.fullmatch(
+        r"(?P<day>\d{1,2})\s*/\s*(?P<month>\d{1,2})\s+"
+        r"(?P<weekday>[^\s()]+)(?:\s+\((?P<english_weekday>[^()]*)\))?",
+        compact_raw,
+    )
+    weekday_names = {
+        "пнд": 0,
+        "пн": 0,
+        "mon": 0,
+        "втр": 1,
+        "вт": 1,
+        "tue": 1,
+        "ср": 2,
+        "срд": 2,
+        "wed": 2,
+        "чтв": 3,
+        "чт": 3,
+        "thu": 3,
+        "птн": 4,
+        "пт": 4,
+        "fri": 4,
+        "сб": 5,
+        "sat": 5,
+        "вск": 6,
+        "вс": 6,
+        "sun": 6,
+    }
+
+    if match is None:
+        warnings.warn(
+            NormalizeInvalidDayFormatWarning(
+                "parse_day_cell", f"raw is not a valid day cell: {raw}"
+            ),
+            stacklevel=2,
+        )
+        return (0, 0, -1)
+
+    day = int(match.group("day"))
+    month = int(match.group("month"))
+    weekday = weekday_names.get(match.group("weekday").lower())
+    english_weekday = match.group("english_weekday")
+    if weekday is None and english_weekday is not None:
+        weekday = weekday_names.get(english_weekday.strip().lower())
+
+    try:
+        datetime(2000, month, day)
+    except ValueError:
+        weekday = None
+
+    if weekday is None:
+        warnings.warn(
+            NormalizeInvalidDayFormatWarning(
+                "parse_day_cell", f"raw is not a valid day cell: {raw}"
+            ),
+            stacklevel=2,
+        )
+        return (0, 0, -1)
+
+    return (day, month, weekday)
 
 
 ACADEMIC_YEAR_START_MONTH = 9
