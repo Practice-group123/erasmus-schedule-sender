@@ -1,10 +1,11 @@
-"""Pure helpers: raw cell text -> clean values. No I/O, easy to unit test.
-
-Task 4.
-"""
-
 from datetime import datetime, time
-import errors.normalize_errors as errors
+
+import warnings
+
+from project_warnings.normalize_warnings import (
+    NormalizeEmptyValueWarning,
+    NormalizeInvalidTimeFormatWarning,
+)
 
 def normalize_text(raw: str) -> str:
     """Trim and collapse whitespace. Case is kept.
@@ -14,39 +15,46 @@ def normalize_text(raw: str) -> str:
 
     non_space_raw = raw.replace(" ", "")
     if not non_space_raw:
-        raise errors.NormalizeEmptyValueError("normalize_text", "raw is empty")
+        warnings.warn(
+            NormalizeEmptyValueWarning("normalize_text", "raw is empty"),
+            stacklevel=2,
+        )
+        return ""
     
     lowered_raw = non_space_raw.lower()
     
     return lowered_raw
 
 
-def parse_time_range(raw: str) -> tuple[time, time]:
-    """"08:30-10:00" -> (time(8, 30), time(10, 0)).
+def parse_time_range(raw: str) -> str:
+    """" 08:3 0 - 10:00 " -> "08:00-10:00".
 
-    Also accept "8:30 - 10:00", "08.30-10.00". Raise ValueError on bad input.
+    Also accept "8:30 - 10:00", "08.30-10.00". Warn and return None on bad input.
     """
     non_space_raw = raw.replace(" ", "")
     if not non_space_raw:
-        raise errors.NormalizeEmptyValueError("parse_time_range", "raw is empty")
+        warnings.warn(
+            NormalizeEmptyValueWarning("parse_time_range", "raw is empty"),
+            stacklevel=2,
+        )
+        return ""
     time_array = non_space_raw.replace(".", ":").split("-")
     if len(time_array) != 2:
-        raise errors.NormalizeInvalidTimeFormatError("parse_time_range", f"raw is not a valid time range: {raw}")
-
-    try:
-        start_time = datetime.strptime(time_array[0], "%H:%M").time()
-        end_time = datetime.strptime(time_array[1], "%H:%M").time()
-    except ValueError:
-        raise errors.NormalizeInvalidTimeFormatError("parse_time_range", f"raw is not a valid time range: {raw}")
-
-    return (start_time, end_time)
+        warnings.warn(
+            NormalizeInvalidTimeFormatWarning(
+                "parse_time_range", f"raw is not a valid time range: {raw}"
+            ),
+            stacklevel=2,
+        )
+        return ""
+    return f"{time_array[0]}-{time_array[1]}"
 
 
 
 def parse_day_cell(raw: str) -> tuple[int, int, int]:
     """"26/10 Пнд (Mon)" -> (26, 10, 0): day, month, weekday (Mon=0 ... Sun=6).
 
-    The cell may contain line breaks. Raise ValueError on bad input.
+    The cell may contain line breaks. Warn on bad input.
     """
     raise NotImplementedError
 
@@ -59,7 +67,7 @@ def resolve_year(month: int, academic_year: str) -> int:
 
     academic_year comes from the sheet header, never hardcode it.
     "2026/2027": months from ACADEMIC_YEAR_START_MONTH to December -> 2026,
-    January to the month before -> 2027. Raise ValueError on bad input.
+    January to the month before -> 2027. Warn on bad input.
     """
     raise NotImplementedError
 
