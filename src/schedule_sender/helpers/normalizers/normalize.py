@@ -186,4 +186,11 @@ def resolve_year(month: int, academic_year: str) -> int:
 
 def normalize_room(raw: str) -> str | None:
     """"218" -> "218", " Online " -> "online", "" -> None."""
-    raise NotImplementedError
+    if not raw or not raw.strip():
+        warnings.warn(
+            NormalizeEmptyValueWarning("normalize_room", "raw is empty"),
+            stacklevel=2,
+        )
+        return None
+
+    return re.sub(r"\s+", " ", raw).strip().lower()
